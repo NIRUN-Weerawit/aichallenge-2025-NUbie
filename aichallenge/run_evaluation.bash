@@ -132,7 +132,7 @@ trap cleanup SIGINT SIGTERM EXIT
 
 # Move working directory
 OUTPUT_DIRECTORY=$(date +%Y%m%d-%H%M%S)
-cd /output || exit
+cd output || exit
 mkdir "$OUTPUT_DIRECTORY"
 ln -nfs "$OUTPUT_DIRECTORY" latest
 cd "$OUTPUT_DIRECTORY" || exit

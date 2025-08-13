@@ -1,10 +1,15 @@
 # FROM osrf/ros:humble-desktop AS common
 FROM ghcr.io/automotiveaichallenge/autoware-universe:humble-latest AS common
 
-RUN echo "deb [trusted=yes] https://download.eclipse.org/zenoh/debian-repo/ /" | tee -a /etc/apt/sources.list > /dev/null && apt-get update
-COPY packages.txt /tmp/packages.txt
-RUN xargs -a /tmp/packages.txt apt-get install -y --no-install-recommends
 
+
+# Make all apt operations noninteractive (avoids tzdata and passwd prompts)
+ENV DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC
+    
+RUN echo "deb [trusted=yes] https://download.eclipse.org/zenoh/debian-repo/ /" \
+    | tee -a /etc/apt/sources.list > /dev/null
+COPY packages.txt /tmp/packages.txt
+    
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install -r requirements.txt

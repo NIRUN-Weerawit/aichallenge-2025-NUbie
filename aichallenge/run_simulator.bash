@@ -1,5 +1,5 @@
 #!/bin/bash
-AWSIM_DIRECTORY=/aichallenge/simulator/AWSIM
+AWSIM_DIRECTORY=/aichallenge/aichallenge/simulator/AWSIM
 
 mode="${1}"
 
