@@ -571,6 +571,25 @@ Visualization Manager:
           Value: true
       Enabled: true
       Name: Control
+    - Class: rviz_common/Group
+      Displays:
+        - Alpha: 0.5
+          Class: rviz_default_plugins/PointStamped
+          Color: 255; 0; 0
+          Enabled: true
+          History Length: 1
+          Name: PointStamped
+          Radius: 0.800000011920929
+          Topic:
+            Depth: 1
+            Durability Policy: Volatile
+            Filter size: 10
+            History Policy: Keep Last
+            Reliability Policy: Best Effort
+            Value: /control/debug/closest_point
+          Value: true
+      Enabled: true
+      Name: Control2
     - Alpha: 0.30000001192092896
       Cell Size: 2
       Class: rviz_default_plugins/Grid

@@ -33,6 +33,7 @@ class SimplePurePursuit : public rclcpp::Node {
   rclcpp::Publisher<AckermannControlCommand>::SharedPtr pub_cmd_;
   rclcpp::Publisher<AckermannControlCommand>::SharedPtr pub_raw_cmd_;
   rclcpp::Publisher<PointStamped>::SharedPtr pub_lookahead_point_;  
+  rclcpp::Publisher<PointStamped>::SharedPtr pub_closest_point_;  
 
   // timer
   rclcpp::TimerBase::SharedPtr timer_;

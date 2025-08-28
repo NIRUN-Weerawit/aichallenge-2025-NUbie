@@ -22,6 +22,7 @@ TOPICS=(
     "/control/command/actuation_cmd"
     "/control/command/control_cmd"
     "/control/debug/lookahead_point"
+    "/control/debug/closest_point"
     "/diagnostics"
     "/localization/acceleration"
     "/localization/biased_pose"
