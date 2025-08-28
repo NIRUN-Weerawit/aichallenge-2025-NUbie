@@ -1,0 +1,1 @@
+"This is just trial for git test."
