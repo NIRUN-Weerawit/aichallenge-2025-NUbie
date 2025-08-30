@@ -59,18 +59,18 @@ void SimplePurePursuit::onTimer()
     return;
   }
 
-  size_t closet_traj_point_idx =
+  size_t closest_traj_point_idx =
     findNearestIndex(trajectory_->points, odometry_->pose.pose.position);
 
   // publish zero command
   AckermannControlCommand cmd = zeroAckermannControlCommand(get_clock()->now());
 
   // get closest trajectory point from current position
-  TrajectoryPoint closet_traj_point = trajectory_->points.at(closet_traj_point_idx);
+  TrajectoryPoint closest_traj_point = trajectory_->points.at(closest_traj_point_idx);
 
   // calc longitudinal speed and acceleration
   double target_longitudinal_vel =
-    use_external_target_vel_ ? external_target_vel_ : closet_traj_point.longitudinal_velocity_mps;
+    use_external_target_vel_ ? external_target_vel_ : closest_traj_point.longitudinal_velocity_mps;
   double current_longitudinal_vel = odometry_->twist.twist.linear.x;
 
   cmd.longitudinal.speed = target_longitudinal_vel;
@@ -85,13 +85,54 @@ void SimplePurePursuit::onTimer()
                   wheel_base_ / 2.0 * std::cos(odometry_->pose.pose.orientation.z);
   double rear_y = odometry_->pose.pose.position.y -
                   wheel_base_ / 2.0 * std::sin(odometry_->pose.pose.orientation.z);
-  //// search lookahead point
+  
+  /*
+                  //// search lookahead point
   auto lookahead_point_itr = std::find_if(
-    trajectory_->points.begin() + closet_traj_point_idx, trajectory_->points.end(),
+    trajectory_->points.begin() + closest_traj_point_idx, trajectory_->points.end(),
     [&](const TrajectoryPoint & point) {
       return std::hypot(point.pose.position.x - rear_x, point.pose.position.y - rear_y) >=
              lookahead_distance;
     });
+*/
+
+//// search lookahead point
+
+  size_t loop_start_idx = 12;
+  std::vector<TrajectoryPoint>::iterator lookahead_point_itr;
+  auto distance_check = [&](const TrajectoryPoint &point)
+  {
+    return std::hypot(point.pose.position.x - rear_x, point.pose.position.y - rear_y) >= lookahead_distance;
+  };
+
+  if (closest_traj_point_idx < loop_start_idx)
+  {
+    // Entry part (search forward only)
+    lookahead_point_itr = std::find_if(
+        trajectory_->points.begin() + closest_traj_point_idx, trajectory_->points.end(), distance_check);
+
+    // If not found
+    if (lookahead_point_itr == trajectory_->points.end())
+    {
+      lookahead_point_itr = trajectory_->points.begin() + std::min(closest_traj_point_idx, trajectory_->points.size()-1);
+    }
+  }
+  else
+  {
+    // Inside loop
+    lookahead_point_itr = std::find_if(
+        trajectory_->points.begin() + closest_traj_point_idx, trajectory_->points.end(),
+        distance_check);
+
+    if (lookahead_point_itr == trajectory_->points.end())
+    {
+      lookahead_point_itr = std::find_if(
+          trajectory_->points.begin() + loop_start_idx, trajectory_->points.begin() + closest_traj_point_idx,
+          distance_check);
+    }
+  }
+
+
   double lookahead_point_x = lookahead_point_itr->pose.position.x;
   double lookahead_point_y = lookahead_point_itr->pose.position.y;
 
@@ -100,7 +141,7 @@ void SimplePurePursuit::onTimer()
   lookahead_point_msg.header.frame_id = "map";
   lookahead_point_msg.point.x = lookahead_point_x;
   lookahead_point_msg.point.y = lookahead_point_y;
-  lookahead_point_msg.point.z = closet_traj_point.pose.position.z;
+  lookahead_point_msg.point.z = closest_traj_point.pose.position.z;
   pub_lookahead_point_->publish(lookahead_point_msg);
 
   // calc steering angle for lateral control
